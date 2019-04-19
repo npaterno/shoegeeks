@@ -57,7 +57,7 @@ data_new_entries <- data_new_names %>%
     common_race %in% c("10k","10K") ~ "10 K",
     common_race %in% c("Triathlon. 13.1", "21km","Half Marathons","Half","13.1 Miles","Half marathon","Half Marathon","half marathon","half-marathon","13.1")  ~ "Half Marathon",
     common_race %in% c("Marathon","42","42k","Marathon (Ironman)", "marathon", "Full marathon", "26.2") ~ "Marathon",
-    common_race %in% c("50-70 km","26.2+", "50 mile", "Ultra", "Ultras","Ultra distance of varying length", "50k" ) ~ "Ultra",
+    common_race %in% c("50-100 miles", "26.2+", "Marathon and up", "50-70 km","100k", "26.2+", "50 mile", "Ultra", "Ultras","Ultra distance of varying length", "50k" ) ~ "Ultra",
     is.na(common_race) ~ "None",
     TRUE ~ "Other"
     ))
