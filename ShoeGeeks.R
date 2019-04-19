@@ -6,7 +6,7 @@ library(stringr)
 library(scales)
 
 #read in raw data; last update 4/18/19 am (n=155)
-raw_data <- readr::read_csv("C:/Users/Guru/Documents/R/ShoeGeeks/Running Shoe Survey.csv")
+raw_data <- readr::read_csv("https://raw.githubusercontent.com/npaterno/shoegeeks/master/Running%20Shoe%20Survey.csv?token=ALTXHMHABANBTVDRZG4YMOC4XEZ4I")
 
 #rename variables and drop the Timestamp from GoogleForms
 data_new_names <- raw_data %>% 
@@ -89,10 +89,12 @@ men <- data_clean %>%
 women <- data_clean %>% 
   filter(gender=="W")
 
-#Create data set to compare brand loyalty across gender
-brands <- data_clean %>% 
+#Create data set to compare brand popularity/loyalty across gender
+brand_pop <- data_clean %>% 
+  filter(!is.na(gender)) %>% 
   group_by(gender) %>% 
-  summarize(Adidas = sum(!is.na(Adidas)),
+  summarize(
+            Adidas = sum(!is.na(Adidas)),
             Altra = sum(!is.na(Altra)),
             Asics = sum(!is.na(Asics)),
             Brooks = sum(!is.na(Brooks)),
@@ -107,9 +109,30 @@ brands <- data_clean %>%
             Skechers = sum(!is.na(Skechers)),
             Other = sum(!is.na(Other))) %>% 
   gather(Adidas, Altra, Asics, Brooks, Hoka, Mizuno, `New Balance`, Newton, Nike,
-         On, Salming, Saucony, Skechers, Other, key = "Brand", value = "Runners") %>% 
-  filter(!is.na(gender)) 
+         On, Salming, Saucony, Skechers, Other, key = "brand", value = "runners")  
+  
 
+
+brand_loyal <- data_clean %>% 
+  filter(!is.na(gender)) %>% 
+  group_by(gender) %>% 
+  summarize(Adidas = mean(Adidas,na.rm=TRUE),
+            Altra = mean(Altra,na.rm=TRUE),
+            Asics = mean(Asics,na.rm=TRUE),
+            Brooks = mean(Brooks,na.rm=TRUE),
+            Hoka = mean(Hoka, na.rm=TRUE),
+            Mizuno = mean(Mizuno, na.rm=TRUE),
+            `New Balance` = mean(`New Balance`,na.rm=TRUE),
+            Newton = mean(Newton,na.rm=TRUE),
+            Nike = mean(Nike,na.rm=TRUE),
+            On = mean(On,na.rm=TRUE),
+            Salming = mean(Salming,na.rm=TRUE),
+            Saucony = mean(Saucony,na.rm=TRUE),
+            Skechers = mean(Skechers,na.rm=TRUE)) %>% 
+           # Other = mean(Other,na.rm=TRUE)) %>% 
+  gather(Adidas, Altra, Asics, Brooks, Hoka, Mizuno, `New Balance`, Newton, Nike,
+         On, Salming, Saucony, Skechers, key = "brand_avg", value = "per_runner")
+  
 ##GRAPHICS BELOW##
 
 #Age Histogram
@@ -118,8 +141,7 @@ ggplot(data_clean)+
   scale_y_continuous(label = percent_format())+
   labs(title="Age Distribution",
        x="Age",
-       y="Percent",
-       caption = "Graphic: @Mathl3t3")
+       y="Percent")
 
 #MPW Histogram
 ggplot(data_clean)+
@@ -127,20 +149,27 @@ ggplot(data_clean)+
   scale_y_continuous(label = percent_format())+
   labs(title="Weekly Mileage Distribution",
        x="Miles Per Week",
-       y="Percent",
-       caption = "Graphic: @Mathl3t3")
+       y="Percent")
 
-#Brand Loyalty Across Gender
-ggplot(brands %>% group_by(gender),aes(x=Brand,y=Runners, fill=gender),color="white")+
-  geom_col()+
+#Brand Popularity Across Gender: Number of runners who own each brand
+ggplot(brand_pop ,aes(x=brand,y=runners),color="white")+
+  geom_col(fill="Dark Red")+
   coord_flip()+
-  theme_bw() %+replace%
-  theme(legend.position = "none")+
+  theme_bw() +
   facet_wrap(~gender)+
   labs(title="Brand Popularity",
        x="Brand",
-       y="Number of Runners",
-       caption = "Graphic: @Mathl3t3")
+       y="Number of Runners")
+
+#Brand Loyalty: Average Pairs per runner per brand
+ggplot(brand_loyal ,aes(x=brand_avg,y=per_runner),color="white")+
+  geom_col(fill="Dark Red")+
+  coord_flip()+
+  theme_bw() +
+  facet_wrap(~gender)+
+  labs(title="Brand Loyalty",
+       x="Brand",
+       y="Average Pairs Per Runner")
 
 #Scatterplot of Shoes Owned V Shoes Used
 #Conclusion: most people run in less than half the shoes they own
@@ -150,8 +179,7 @@ ggplot(data_clean,aes(x=pairs_owned,y=pairs_used,color=gender))+
   labs(title = "Collection Size V Rotation Size",
        x="Colletion Size",
        y="Rotation Size",
-       color = "Gender",
-       caption = "Graphic: @Mathl3t3")
+       color = "Gender")
 
 #Shoe Size Histograms by Gender
 ggplot(women,aes(x=size))+
@@ -160,8 +188,7 @@ ggplot(women,aes(x=size))+
   theme_bw()+
   labs(title="Women's Shoe Size",
        x="Size",
-       y="Frequency",
-       caption = "Graphic: @Mathl3t3")
+       y="Frequency")
 
 ggplot(men,aes(x=size))+
   geom_histogram(aes(y=stat(width*density)),fill="blue",color="white", binwidth=0.5)+
@@ -169,5 +196,4 @@ ggplot(men,aes(x=size))+
   theme_bw()+
   labs(title="Men's Shoe Size",
        x="Size",
-       y="Frequency",
-       caption = "Graphic: @Mathl3t3")
+       y="Frequency")
