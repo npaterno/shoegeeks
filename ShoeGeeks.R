@@ -53,11 +53,11 @@ data_new_entries <- data_new_names %>%
   select(-c("drop1","drop2","drop3","drop4","drop5","drop6","drop7",
             "drop8","drop9","drop10","drop11","drop12","drop13","drop14")) %>% 
   mutate(distance = case_when(
-    common_race %in% c("5k","5K","5","5000m") ~ "5 K",
-    common_race %in% c("10k","10K") ~ "10 K",
-    common_race %in% c("Triathlon. 13.1", "21km","Half Marathons","Half","13.1 Miles","Half marathon","Half Marathon","half marathon","half-marathon","13.1")  ~ "Half Marathon",
-    common_race %in% c("Marathon","42","42k","Marathon (Ironman)", "marathon", "Full marathon", "26.2") ~ "Marathon",
-    common_race %in% c("50-100 miles", "26.2+", "Marathon and up", "50-70 km","100k", "26.2+", "50 mile", "Ultra", "Ultras","Ultra distance of varying length", "50k" ) ~ "Ultra",
+    str_detect(common_race, paste(c("50-100 miles", "26.2+", "Marathon and up", "50-70 km","100k", "26.2+", "50 mile", "Ultra", "Ultras","Ultra distance of varying length", "50k" ),collapse = '|')) ~ "Ultra",
+    str_detect(common_race, paste(c("5k","5K","5","5000m"),collapse = '|'))==TRUE ~ "5 K",
+    str_detect(common_race, paste(c("10k","10K"),collapse = '|')) ~ "10 K",
+    str_detect(common_race, paste(c("Triathlon. 13.1", "21km","Half Marathons","Half","13.1 Miles","Half marathon","Half Marathon","half marathon","half-marathon","13.1"),collapse = '|'))  ~ "Half Marathon",
+    str_detect(common_race, paste(c("Marathon","42","42k","Marathon (Ironman)", "marathon", "Full marathon", "26.2"),collapse = '|')) ~ "Marathon",
     is.na(common_race) ~ "None",
     TRUE ~ "Other"
     ))
@@ -197,3 +197,10 @@ ggplot(men,aes(x=size))+
   labs(title="Men's Shoe Size",
        x="Size",
        y="Frequency")
+
+#plot to compare weekly mileage based on most common race distance
+#ggplot(data_clean)+
+#geom_histogram(aes(x=miles_per_week),binwidth=5)+
+#facet_wrap(~distance)
+#ggplot(data_clean)+
+#     geom_histogram(aes(x=miles_per_week, fill=distance),binwidth = 5, color="white")
